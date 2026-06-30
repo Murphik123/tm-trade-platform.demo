@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Зайди удивишься — Цифровая платформа Туркменистана</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { font-family: 'Segoe UI', system-ui, 'Inter', sans-serif; }
+        body { background: linear-gradient(145deg, #f3e9dc 0%, #dccdb8 100%); margin: 0; min-height: 100vh; }
+        .glass-card { background: rgba(255,248,235,0.85); backdrop-filter: blur(16px); border-radius: 2rem; border: 1px solid rgba(255,245,225,0.9); box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
+        .win11-tile { background: rgba(235,220,195,0.85); backdrop-filter: blur(8px); border-radius: 18px; transition: all 0.2s; border: 1px solid rgba(255,255,255,0.65); cursor: pointer; }
+        .win11-tile:hover { transform: scale(0.97); background: rgba(240,228,208,0.95); }
+        .tile-icon-circle { width: 52px; height: 52px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 1.9rem; color: white; }
+        .carousel-container { overflow: hidden; border-radius: 2rem; box-shadow: 0 25px 40px -12px rgba(0,0,0,0.2); background: #b89a70; position: relative; cursor: default; }
+        .carousel-image { object-fit: cover; width: 100%; height: 100%; transition: transform 0.2s; }
+        .avatar-img { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid white; }
+        .auth-modal, .product-modal, .fullscreen-modal, .notification-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92); backdrop-filter: blur(6px); z-index: 100000; align-items: center; justify-content: center; }
+        .fullscreen-modal { background: rgba(0,0,0,0.95); }
+        .fullscreen-modal .fullscreen-content { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; padding: 10px; box-sizing: border-box; position: relative; }
+        .fullscreen-modal .fullscreen-content img { width: 100%; height: 100%; object-fit: contain; border-radius: 0.3rem; box-shadow: 0 0 60px rgba(0,0,0,0.5); }
+        .fullscreen-modal .modal-close { position: absolute; top: 20px; right: 30px; font-size: 2.5rem; color: white; cursor: pointer; background: none; border: none; z-index: 10; transition: 0.2s; }
+        .fullscreen-modal .modal-close:hover { transform: scale(1.2); color: #ccc; }
+        .fullscreen-modal .fullscreen-nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.4); color: white; border: none; font-size: 2.5rem; padding: 0.5rem 1rem; cursor: pointer; z-index: 10; border-radius: 50%; transition: 0.2s; }
+        .fullscreen-modal .fullscreen-nav:hover { background: rgba(0,0,0,0.7); }
+        .fullscreen-modal .fullscreen-nav.prev { left: 20px; }
+        .fullscreen-modal .fullscreen-nav.next { right: 20px; }
+        .auth-modal-content, .product-modal-content, .edit-modal-content { background: rgba(255,250,240,0.98); border-radius: 2rem; max-width: 500px; width: 90%; box-shadow: 0 30px 50px rgba(0,0,0,0.3); overflow: hidden; }
+        .auth-tabs { display: flex; border-bottom: 1px solid #e2d5c0; }
+        .auth-tab { flex: 1; padding: 1rem; text-align: center; font-weight: 600; cursor: pointer; background: #f5ede1; color: #6b4e2e; transition: 0.2s; }
+        .auth-tab.active { background: #0b5e42; color: white; }
+        .auth-form-container { padding: 1.8rem; max-height: 70vh; overflow-y: auto; }
+        .auth-form input, .auth-form select, .edit-form input, .edit-form select { width: 100%; padding: 0.75rem; border-radius: 1rem; border: 1px solid #e2d5c0; background: white; margin-bottom: 1rem; outline: none; transition: 0.2s; }
+        .auth-form input:focus, .edit-form input:focus, .edit-form select:focus { border-color: #0b5e42; box-shadow: 0 0 0 3px rgba(11,94,66,0.2); }
+        .auth-btn, .blue-btn, .edit-btn { background: #0b5e42; color: white; padding: 0.75rem; border-radius: 2rem; font-weight: bold; width: 100%; border: none; cursor: pointer; transition: 0.2s; }
+        .auth-btn:hover, .blue-btn:hover, .edit-btn:hover { background: #09452f; }
+        .footer-clock { font-family: monospace; font-size: 0.75rem; color: #6b4e2e; }
+        .lang-switch-btn { background: #d9b48b; color: #3b2a1f; padding: 6px 14px; border-radius: 40px; font-weight: bold; font-size: 0.9rem; border: none; cursor: pointer; transition: 0.2s; }
+        .lang-switch-btn:hover { background: #c2a070; transform: scale(0.97); }
+        .badge-eds { background: #1e3a8a; color: white; font-size: 0.6rem; padding: 2px 8px; border-radius: 20px; display: inline-block; margin-left: 6px; }
+        .badge-blockchain { background: #b45309; color: white; font-size: 0.6rem; padding: 2px 8px; border-radius: 20px; display: inline-block; margin-left: 6px; }
+        .notif-modal-content { background: white; border-radius: 1.5rem; max-width: 450px; width: 90%; padding: 2rem; text-align: center; box-shadow: 0 30px 60px rgba(0,0,0,0.4); }
+        .flag-oval { display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 46px; border-radius: 40px; background: transparent; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid rgba(255,255,255,0.25); backdrop-filter: blur(4px); padding: 4px; cursor: default; transition: 0.2s; }
+        .flag-oval img { height: 2rem; width: auto; display: block; border-radius: 2px; }
+        @media (max-width: 640px) { .flag-oval { width: 54px; height: 38px; } .flag-oval img { height: 1.6rem; } }
+        .slider-control { position: absolute; top: 10px; right: 10px; z-index: 40; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); border-radius: 30px; padding: 4px 12px; font-size: 0.75rem; color: white; cursor: pointer; transition: 0.2s; border: none; display: flex; align-items: center; gap: 6px; }
+        .slider-control:hover { background: rgba(0,0,0,0.7); }
+        .slider-dropdown { position: absolute; top: 35px; right: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); border-radius: 16px; padding: 6px 0; min-width: 140px; z-index: 45; display: none; flex-direction: column; gap: 4px; }
+        .slider-dropdown button { background: transparent; border: none; color: white; padding: 6px 16px; text-align: left; font-size: 0.75rem; cursor: pointer; width: 100%; transition: 0.1s; }
+        .slider-dropdown button:hover { background: rgba(255,255,255,0.2); }
+        .carousel-caption { display: none; }
+        @media (max-width: 480px) { .flag-oval { width: 48px; height: 34px; } .flag-oval img { height: 1.4rem; } }
+        .product-table { width: 100%; border-collapse: collapse; }
+        .product-table td, .product-table th { padding: 0.5rem; border-bottom: 1px solid #e2d5c0; text-align: left; }
+        .product-table tr:hover { background: #f9f4eb; }
+        .edit-icon { color: #0b5e42; cursor: pointer; margin-left: 0.5rem; }
+        .edit-icon:hover { color: #09452f; }
+    </style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+// ================================================================
+//  Проект "Зайди удивишься" – v5.0 (Интеграция с бэкендом)
+//  Автор: С. Иванов
+//  Дата: 01.07.2026
+//  Использует API бэкенда вместо localStorage.
+// ================================================================
+
+(function() {
+    'use strict';
+
+    // ---------- НАСТРОЙКИ ----------
+    // ВАЖНО: после деплоя бэкенда на Render замените URL на ваш реальный адрес
+    // Например: var API_BASE_URL = 'https://tm-trade-backend.onrender.com';
+    var API_BASE_URL = 'http://localhost:5000'; // пока локально, потом замените
+
+    var FIXED_KEY = '0000 0000 0000';
+    var DEF_PASS = '12345678';
+    var LANGS = ['ru', 'tk', 'en'];
+    var CATS = ['food', 'light', 'construction', 'home'];
+
+    var FLAG_GIF = 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh3hbnGwG5KRo8HsdERoZGpOLcxmh9LEP2y1MNDKqhqIi4Q5nMI7lGLS6_uhznC9sCqozQlqnu1E0PjNo357op78KonB3IZ7XaMgeYxZFiWVYx_taEjlo77dnoCrZKtWBc4pbK4tNUiThw/s1600-e90-rw/Flag_of_Turkmenistan.gif';
+
+    // ---------- ПЕРЕВОДЫ ----------
+    var LANG = {
+        ru: { appTitle: "Зайди удивишься", subtitle: "Туркменистан • Цифровая платформа", login: "Вход", register: "Регистрация", logout: "Выйти", name: "Имя", email: "Email", phone: "Телефон", password: "Пароль", role: "Роль", buyer: "Покупатель", seller: "Продавец", both: "Продавец и покупатель", electronicKey: "Электронный ключ", fixedKeyInfo: "Фиксированный ключ: 0000 0000 0000", welcome: "Добро пожаловать", aiInfo: "ИИ-прогнозы | Блокчейн-сделки | ЭЦП | Отчёты в госорганы", trade: "Алыш-Чалыш", chat: "Чат \"Мы\"", mail: "ТМ Майл", pay: "ТМ Пэй", coin: "TM Coin", bank: "Благо", admin: "Админ", food: "Продукты", light: "Легпром", construction: "Стройматериалы", home: "Бытовая техника", cart: "Корзина", checkout: "Оформить", myProducts: "Мои товары", addProduct: "+ Добавить товар", productName: "Название", retailPrice: "Розничная цена", wholesalePrice: "Оптовая цена", imageUrl: "URL фото", add: "Добавить", cancel: "Отмена", buyRetail: "В розницу", buyWholesale: "Оптом", mainMenu: "Главное меню", loginBtn: "Войти", registerBtn: "Зарегистрироваться", reset: "Сброс данных", avatar: "URL фото", uploadOwn: "Загрузить свои фото", resetSlider: "Сбросить слайдер", emailExists: "Email уже существует", phoneExists: "Телефон уже существует", keyMismatch: "Неверный электронный ключ (должен быть 0000 0000 0000)", fillFields: "Заполните все поля", regSuccess: "Регистрация успешна! Теперь войдите.", invalidLogin: "Неверный логин или пароль", reports: "Отчёты", taxReport: "Отчёт в Налоговую", customsReport: "Отчёт в Таможню", presidentReport: "Доклад Президенту", signEDS: "Подписать ЭЦП", blockchainConfirm: "Запись в блокчейн", signedSuccess: "Договор подписан ЭЦП и зафиксирован в блокчейне!", hash: "Хеш транзакции", balance: "Баланс", credit: "Кредитный потенциал", guarantee: "Банковская гарантия", totalDeals: "Всего сделок", volume: "Объем торгов", saving: "Экономия от выхода из тени", uploadPlaceholder: "Загрузите свои фото (3 шт.)", productAdded: "Товар добавлен в каталог", editProduct: "Редактировать товар", saveChanges: "Сохранить изменения", productUpdated: "Товар обновлён!" },
+        tk: { appTitle: "Gir, haýran gal", subtitle: "Türkmenistan • Sanly platforma", login: "Giriş", register: "Hasaba almak", logout: "Çykmak", name: "Ady", email: "E-poçta", phone: "Telefon", password: "Parol", role: "Rol", buyer: "Alyjy", seller: "Satyjy", both: "Satyjy we alyjy", electronicKey: "Elektron açar", fixedKeyInfo: "Bellikli açar: 0000 0000 0000", welcome: "Hoş geldiňiz", aiInfo: "AI çaklamalar | Blokçeýn | EGP | Döwlet hasabatlary", trade: "Alyş-Çalyş", chat: "Söhbetdeşlik", mail: "TM Mail", pay: "TM Pay", coin: "TM Coin", bank: "Bereket", admin: "Admin", food: "Iýmit", light: "Ýeňil senagat", construction: "Gurluşyk", home: "Öý enjamlary", cart: "Sebet", checkout: "Sargyt", myProducts: "Harytlarym", addProduct: "+ Haryt goş", productName: "Ady", retailPrice: "Bölek bahasy", wholesalePrice: "Kömüç bahasy", imageUrl: "Surat URL", add: "Goş", cancel: "Ýatyr", buyRetail: "Bölek", buyWholesale: "Kömüç", mainMenu: "Baş menyu", loginBtn: "Giriş", registerBtn: "Hasaba al", reset: "Arassala", avatar: "Surat URL", uploadOwn: "Öz suratlaryňy ýükle", resetSlider: "Slýderi arassala", emailExists: "E-poçta eýýäm bar", phoneExists: "Telefon eýýäm bar", keyMismatch: "Nädogry elektron açar (0000 0000 0000 bolmaly)", fillFields: "Ähli meýdançalary dolduryň", regSuccess: "Hasaba almak üstünlikli! Indi giriň.", invalidLogin: "Nädogry login ýa-da parol", reports: "Hasabatlar", taxReport: "Salgyt hasabaty", customsReport: "Gümrük hasabaty", presidentReport: "Prezidente hasabat", signEDS: "EGP bilen gol çek", blockchainConfirm: "Blokçeýnde ýazgy", signedSuccess: "Şertnama EGP bilen gol çekildi we blokçeýnde ýazyldy!", hash: "Transaksiýa hashy", balance: "Balans", credit: "Kredit potensialy", guarantee: "Bank kepilligi", totalDeals: "Jemi geleşikler", volume: "Söwda göwrümi", saving: "Kölege ýolundan çykmakdan ýelgiji", uploadPlaceholder: "Öz suratlaryňy ýükle (3 sany)", productAdded: "Haryt kataloga goşuldy", editProduct: "Harydy redaktirlemek", saveChanges: "Üýtgetmeleri ýazdyr", productUpdated: "Haryt täzelendi!" },
+        en: { appTitle: "Come & Wonder", subtitle: "Turkmenistan • Digital Platform", login: "Login", register: "Register", logout: "Logout", name: "Name", email: "Email", phone: "Phone", password: "Password", role: "Role", buyer: "Buyer", seller: "Seller", both: "Both", electronicKey: "Electronic key", fixedKeyInfo: "Fixed key: 0000 0000 0000", welcome: "Welcome", aiInfo: "AI forecasts | Blockchain | Digital signature | Government reports", trade: "Alysh-Chalysh", chat: "Chat", mail: "TM Mail", pay: "TM Pay", coin: "TM Coin", bank: "Blago", admin: "Admin", food: "Food", light: "Light industry", construction: "Construction", home: "Home appliances", cart: "Cart", checkout: "Checkout", myProducts: "My Products", addProduct: "+ Add Product", productName: "Name", retailPrice: "Retail price", wholesalePrice: "Wholesale price", imageUrl: "Image URL", add: "Add", cancel: "Cancel", buyRetail: "Retail", buyWholesale: "Wholesale", mainMenu: "Main Menu", loginBtn: "Login", registerBtn: "Register", reset: "Reset", avatar: "Photo URL", uploadOwn: "Upload your photos", resetSlider: "Reset slider", emailExists: "Email already exists", phoneExists: "Phone already exists", keyMismatch: "Invalid electronic key (must be 0000 0000 0000)", fillFields: "Fill all fields", regSuccess: "Registration successful! Now login.", invalidLogin: "Invalid login or password", reports: "Reports", taxReport: "Tax report", customsReport: "Customs report", presidentReport: "President report", signEDS: "Sign with EDS", blockchainConfirm: "Blockchain record", signedSuccess: "Contract signed with EDS and recorded on blockchain!", hash: "Transaction hash", balance: "Balance", credit: "Credit potential", guarantee: "Bank guarantee", totalDeals: "Total deals", volume: "Trade volume", saving: "Savings from leaving shadow", uploadPlaceholder: "Upload your photos (3 pcs)", productAdded: "Product added to catalog", editProduct: "Edit product", saveChanges: "Save changes", productUpdated: "Product updated!" }
+    };
+
+    // ---------- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ РАБОТЫ С API ----------
+    function apiRequest(method, url, body = null, auth = true) {
+        var headers = { 'Content-Type': 'application/json' };
+        if (auth) {
+            var token = localStorage.getItem('tm_token');
+            if (token) headers['Authorization'] = 'Bearer ' + token;
+        }
+        var options = { method, headers };
+        if (body) options.body = JSON.stringify(body);
+        return fetch(API_BASE_URL + url, options)
+            .then(res => res.json())
+            .catch(err => {
+                console.error('API Error:', err);
+                ui.notify('Ошибка', 'Не удалось связаться с сервером', 'error');
+                return null;
+            });
+    }
+
+    // ---------- UI (рендеринг) с вызовами API ----------
+    var ui = {
+        getLang: function() {
+            try { var l = localStorage.getItem('app_lang'); if (l && LANGS.indexOf(l) !== -1) return l; } catch(e) {}
+            return 'ru';
+        },
+        t: function(key) {
+            var l = this.getLang();
+            var dict = LANG[l] || LANG['ru'];
+            return dict[key] || key;
+        },
+        notify: function(title, msg, type) {
+            type = type || 'success';
+            var modal = document.getElementById('notifModal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'notifModal';
+                modal.className = 'notification-modal';
+                modal.innerHTML = '<div class="notif-modal-content"><div id="notifIcon" class="text-6xl mb-4">✅</div><h2 id="notifTitle" class="text-2xl font-bold mb-2">Успех</h2><p id="notifMessage" class="text-gray-600 mb-6">Сообщение</p><button onclick="document.getElementById(\'notifModal\').style.display=\'none\'" class="bg-emerald-700 text-white px-6 py-2 rounded-full font-semibold hover:bg-emerald-800 transition">OK</button></div>';
+                document.body.appendChild(modal);
+            }
+            document.getElementById('notifTitle').textContent = title;
+            document.getElementById('notifMessage').innerHTML = msg;
+            var icon = document.getElementById('notifIcon');
+            icon.textContent = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+            modal.style.display = 'flex';
+            modal.onclick = function(e) { if (e.target === modal) modal.style.display = 'none'; };
+        },
+        clock: function() {
+            var el = document.getElementById('footerClock');
+            if (el) el.textContent = new Date().toLocaleTimeString('ru-RU', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+        },
+
+        // Полноэкранный режим
+        openFull: function(idx, slides) {
+            if (!slides || !slides.length) return;
+            window._fsSlides = slides;
+            window._fsIdx = idx;
+            var modal = document.getElementById('fsModal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'fsModal';
+                modal.className = 'fullscreen-modal';
+                modal.innerHTML = '<button class="modal-close" onclick="ui.closeFull()">&times;</button><div class="fullscreen-content"><img id="fsImg" src=""></div><button class="fullscreen-nav prev" id="fsPrev"><i class="fas fa-chevron-left"></i></button><button class="fullscreen-nav next" id="fsNext"><i class="fas fa-chevron-right"></i></button>';
+                document.body.appendChild(modal);
+                modal.onclick = function(e) { if (e.target === modal) ui.closeFull(); };
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && modal.style.display === 'flex') ui.closeFull();
+                    if (e.key === 'ArrowLeft' && modal.style.display === 'flex') ui.showFull(window._fsIdx - 1);
+                    if (e.key === 'ArrowRight' && modal.style.display === 'flex') ui.showFull(window._fsIdx + 1);
+                });
+                document.getElementById('fsPrev').onclick = function(e) { e.stopPropagation(); ui.showFull(window._fsIdx - 1); };
+                document.getElementById('fsNext').onclick = function(e) { e.stopPropagation(); ui.showFull(window._fsIdx + 1); };
+            }
+            ui.showFull(idx);
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        },
+        closeFull: function() {
+            var m = document.getElementById('fsModal');
+            if (m) m.style.display = 'none';
+            document.body.style.overflow = '';
+        },
+        showFull: function(idx) {
+            var slides = window._fsSlides;
+            if (!slides || !slides.length) return;
+            if (idx < 0) idx = slides.length - 1;
+            if (idx >= slides.length) idx = 0;
+            window._fsIdx = idx;
+            var img = document.getElementById('fsImg');
+            if (img) img.src = slides[idx].img;
+        },
+
+        // Карусель (без изменений, работает с localStorage)
+        renderCarousel: function() {
+            var container = document.getElementById('carouselContainer');
+            if (!container) return;
+            var slides = JSON.parse(localStorage.getItem('tm_carousel_slides') || '[]');
+            var current = 0, interval;
+
+            function show(idx) {
+                if (!slides.length || !slides[idx] || !slides[idx].img) {
+                    container.innerHTML = '<div class="relative w-full h-full flex flex-col items-center justify-center bg-amber-800 text-white text-2xl p-6 text-center"><i class="fas fa-images text-6xl mb-4 opacity-50"></i><span>' + ui.t('uploadPlaceholder') + '</span><button onclick="document.getElementById(\'fileInput\').click()" class="mt-4 bg-white/20 hover:bg-white/30 px-6 py-2 rounded-full text-sm transition"><i class="fas fa-upload"></i> ' + ui.t('uploadOwn') + '</button></div>';
+                    return;
+                }
+                var s = slides[idx];
+                container.innerHTML = '<div class="relative w-full h-full" ondblclick="ui.openFull(' + idx + ', slidesData)"><img src="' + s.img + '" class="carousel-image w-full h-full object-cover" onerror="this.parentElement.innerHTML=\'<div class=\'w-full h-full flex items-center justify-center bg-amber-800 text-white text-2xl\'>' + (s.title || '') + '</div>\'"></div>';
+            }
+
+            function start() {
+                if (interval) clearInterval(interval);
+                if (slides.length > 1 && slides[0] && slides[0].img) {
+                    interval = setInterval(function() {
+                        current = (current + 1) % slides.length;
+                        show(current);
+                    }, 6000);
+                }
+            }
+            window.slidesData = slides;
+            show(current);
+            start();
+
+            var prev = document.getElementById('carouselPrev');
+            var next = document.getElementById('carouselNext');
+            if (prev && next) {
+                prev.onclick = function() { if (slides.length) { current = (current - 1 + slides.length) % slides.length; show(current); start(); } };
+                next.onclick = function() { if (slides.length) { current = (current + 1) % slides.length; show(current); start(); } };
+            }
+
+            var parent = container.parentElement;
+            var ctrl = document.getElementById('sliderCtrl');
+            if (!ctrl && parent) {
+                ctrl = document.createElement('button');
+                ctrl.id = 'sliderCtrl';
+                ctrl.className = 'slider-control';
+                ctrl.innerHTML = '<i class="fas fa-sliders-h"></i>';
+                parent.appendChild(ctrl);
+                var drop = document.createElement('div');
+                drop.id = 'sliderDrop';
+                drop.className = 'slider-dropdown';
+                var up = document.createElement('button');
+                up.innerHTML = '<i class="fas fa-upload"></i> ' + ui.t('uploadOwn');
+                up.onclick = function(e) { e.stopPropagation(); drop.style.display = 'none'; document.getElementById('fileInput').click(); };
+                var reset = document.createElement('button');
+                reset.innerHTML = '<i class="fas fa-trash"></i> ' + ui.t('resetSlider');
+                reset.onclick = function(e) { e.stopPropagation(); drop.style.display = 'none'; localStorage.removeItem('tm_carousel_slides'); ui.renderCarousel(); ui.notify('Готово', 'Слайдер сброшен', 'success'); };
+                drop.appendChild(up); drop.appendChild(reset);
+                parent.appendChild(drop);
+                ctrl.onclick = function(e) { e.stopPropagation(); drop.style.display = (drop.style.display === 'flex') ? 'none' : 'flex'; };
+                document.addEventListener('click', function(e) {
+                    if (!ctrl.contains(e.target) && !drop.contains(e.target)) drop.style.display = 'none';
+                });
+            }
+        },
+
+        handleFileUpload: function(ev) {
+            var files = ev.target.files;
+            if (files.length < 3) { ui.notify('Ошибка', 'Выберите 3 изображения', 'error'); return; }
+            var newSlides = [], loaded = 0;
+            for (var i=0; i<3; i++) {
+                var file = files[i];
+                if (!file.type.startsWith('image/')) continue;
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    newSlides.push({ title: '', desc: '', img: e.target.result });
+                    loaded++;
+                    if (loaded === 3) {
+                        localStorage.setItem('tm_carousel_slides', JSON.stringify(newSlides));
+                        ui.renderCarousel();
+                        ui.notify('Успех', 'Слайдер обновлён!', 'success');
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        },
+
+        // ---------- СТРАНИЦЫ ----------
+
+        // Публичная страница
+        renderPublic: function() {
+            var app = document.getElementById('app');
+            if (!app) return;
+            var lang = this.getLang();
+            app.innerHTML =
+                '<div class="min-h-screen flex flex-col">' +
+                '  <div class="flex justify-between items-center p-6 bg-white/30 backdrop-blur-sm">' +
+                '    <div class="flex items-center gap-2">' +
+                '      <div class="flag-oval"><img src="' + FLAG_GIF + '" alt="Флаг"></div>' +
+                '      <h1 class="text-2xl md:text-3xl font-bold text-gray-800">' + this.t('appTitle') + '</h1>' +
+                '    </div>' +
+                '    <div class="flex items-center gap-3">' +
+                '      <button class="lang-switch-btn" id="langBtn">' + lang.toUpperCase() + '</button>' +
+                '      <button id="authBtn" class="bg-emerald-700 hover:bg-emerald-800 text-white font-semibold py-2.5 px-6 rounded-full shadow-lg flex items-center gap-2 transition"><i class="fas fa-user-circle text-xl"></i> ' + this.t('login') + '</button>' +
+                '    </div>' +
+                '  </div>' +
+                '  <div class="flex-1 flex flex-col items-center justify-center px-4 py-8 gap-10">' +
+                '    <div class="relative w-full max-w-5xl mx-auto carousel-container">' +
+                '      <div id="carouselContainer" class="relative h-80 md:h-96 lg:h-[500px]"></div>' +
+                '      <button id="carouselPrev" class="absolute left-4 top-1/2 -translate-y-1/2 bg-white/30 hover:bg-white/50 rounded-full p-3 transition"><i class="fas fa-chevron-left text-white"></i></button>' +
+                '      <button id="carouselNext" class="absolute right-4 top-1/2 -translate-y-1/2 bg-white/30 hover:bg-white/50 rounded-full p-3 transition"><i class="fas fa-chevron-right text-white"></i></button>' +
+                '    </div>' +
+                '    <div class="text-center glass-card p-6 max-w-2xl">' +
+                '      <p class="text-gray-800 text-lg font-medium"><i class="fas fa-gem text-emerald-600 mr-2"></i> ' + this.t('subtitle') + '</p>' +
+                '      <p class="text-gray-600 text-sm mt-2">' + this.t('aiInfo') + '</p>' +
+                '      <div class="flex gap-4 justify-center mt-3"><span class="badge-eds"><i class="fas fa-file-signature"></i> ЭЦП</span><span class="badge-blockchain"><i class="fas fa-link"></i> Блокчейн</span></div>' +
+                '    </div>' +
+                '  </div>' +
+                '  <footer class="py-3 text-center text-xs text-gray-600 border-t border-white/30 flex justify-between items-center px-6"><span>© 2026 ' + this.t('appTitle') + ' — ' + this.t('subtitle') + '</span><span id="footerClock" class="footer-clock"></span></footer>' +
+                '</div>';
+            if (!document.getElementById('fileInput')) {
+                var inp = document.createElement('input');
+                inp.type = 'file'; inp.id = 'fileInput'; inp.accept = 'image/*'; inp.multiple = true; inp.style.display = 'none';
+                inp.onchange = ui.handleFileUpload.bind(ui);
+                document.body.appendChild(inp);
+            }
+            this.renderCarousel();
+            this.clock();
+            document.getElementById('authBtn').onclick = function() { ui.showAuthModal(); };
+            document.getElementById('langBtn').onclick = function() {
+                var cur = ui.getLang();
+                var idx = LANGS.indexOf(cur);
+                var next = LANGS[(idx + 1) % LANGS.length];
+                localStorage.setItem('app_lang', next);
+                ui.renderPublic();
+            };
+            if (window._clockInt) clearInterval(window._clockInt);
+            window._clockInt = setInterval(ui.clock, 1000);
+        },
+
+        // Главная (после входа)
+        renderMain: function() {
+            var user = JSON.parse(localStorage.getItem('tm_user') || 'null');
+            if (!user) { this.renderPublic(); return; }
+            var app = document.getElementById('app');
+            if (!app) return;
+            var isAdmin = (user.role === 'admin');
+            var lang = this.getLang();
+            var tiles = [
+                { key: 'trade', label: this.t('trade'), icon: 'fa-chart-line', grad: 'linear-gradient(135deg,#0F6CBD,#0A4B8A)' },
+                { key: 'mail', label: this.t('mail'), icon: 'fa-envelope', grad: 'linear-gradient(135deg,#DC2626,#991B1B)' },
+                { key: 'chat', label: this.t('chat'), icon: 'fa-comments', grad: 'linear-gradient(135deg,#1E7B4B,#0F5B3A)' },
+                { key: 'pay', label: this.t('pay'), icon: 'fa-credit-card', grad: 'linear-gradient(135deg,#7C3AED,#5B21B6)' },
+                { key: 'coin', label: this.t('coin'), icon: 'fa-coins', grad: 'linear-gradient(135deg,#F59E0B,#D97706)' },
+                { key: 'bank', label: this.t('bank'), icon: 'fa-building-columns', grad: 'linear-gradient(135deg,#0891B2,#0E5E6F)' }
+            ];
+            var htmlTiles = '';
+            for (var i=0; i<tiles.length; i++) {
+                var t = tiles[i];
+                htmlTiles += '<div onclick="app.navigateTo(\'' + t.key + '\')" class="win11-tile p-4 text-center"><div class="tile-icon-circle mx-auto mb-2" style="background:' + t.grad + '"><i class="fas ' + t.icon + ' text-2xl"></i></div><span>' + t.label + '</span></div>';
+            }
+            if (isAdmin) {
+                htmlTiles += '<div onclick="app.navigateTo(\'admin\')" class="win11-tile p-4 text-center"><div class="tile-icon-circle mx-auto mb-2" style="background:linear-gradient(135deg,#4A5568,#2D3748)"><i class="fas fa-chart-bar text-2xl"></i></div><span>' + this.t('admin') + '</span></div>';
+            }
+            var stats = '';
+            if (isAdmin) {
+                stats = '<div class="mt-8 max-w-6xl mx-auto bg-white/50 p-4 rounded-2xl border border-white/40 flex justify-around text-center"><div><span class="text-sm text-gray-500">' + this.t('totalDeals') + '</span><div class="text-2xl font-bold text-emerald-800">1 247</div></div><div><span class="text-sm text-gray-500">' + this.t('volume') + '</span><div class="text-2xl font-bold text-emerald-800">84.5 млн TMT</div></div><div><span class="text-sm text-gray-500">' + this.t('saving') + '</span><div class="text-2xl font-bold text-emerald-800">12.3 млн TMT</div></div></div>';
+            }
+            app.innerHTML =
+                '<div class="min-h-screen flex flex-col">' +
+                '  <div class="flex justify-between items-center p-4 bg-white/40 backdrop-blur-sm border-b border-white/30">' +
+                '    <div class="flex items-center gap-2">' +
+                '      <div class="flag-oval"><img src="' + FLAG_GIF + '" alt="Флаг"></div>' +
+                '      <span class="font-bold text-xl">' + this.t('appTitle') + '</span>' +
+                '    </div>' +
+                '    <div class="flex items-center gap-3">' +
+                '      <button class="lang-switch-btn" id="langBtn">' + lang.toUpperCase() + '</button>' +
+                '      <img src="' + user.avatar + '" class="avatar-img"><span>' + user.name + '</span>' +
+                '      <button onclick="app.logout()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full text-sm transition"><i class="fas fa-sign-out-alt"></i> ' + this.t('logout') + '</button>' +
+                '    </div>' +
+                '  </div>' +
+                '  <div class="flex-1 p-6">' +
+                '    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 max-w-6xl mx-auto">' + htmlTiles + '</div>' +
+                stats +
+                '  </div>' +
+                '  <footer class="py-3 text-center text-xs text-gray-600 border-t border-white/30 flex justify-between items-center px-6"><span>© 2026 ' + this.t('appTitle') + ' — ' + this.t('subtitle') + '</span><span id="footerClock" class="footer-clock"></span></footer>' +
+                '</div>';
+            this.clock();
+            document.getElementById('langBtn').onclick = function() {
+                var cur = ui.getLang();
+                var idx = LANGS.indexOf(cur);
+                var next = LANGS[(idx + 1) % LANGS.length];
+                localStorage.setItem('app_lang', next);
+                ui.renderMain();
+                if (window._currentView && window._currentView !== 'home') app.navigateTo(window._currentView);
+            };
+            if (window._clockInt) clearInterval(window._clockInt);
+            window._clockInt = setInterval(ui.clock, 1000);
+        },
+
+        // ----- Модалка авторизации (с API) -----
+        showAuthModal: function() {
+            var modal = document.getElementById('authModal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'authModal';
+                modal.className = 'auth-modal';
+                modal.innerHTML =
+                    '<div class="auth-modal-content">' +
+                    '<span class="close-modal" style="float:right;font-size:2rem;padding:0.5rem 1.5rem;cursor:pointer;">&times;</span>' +
+                    '<div class="auth-tabs"><div class="auth-tab active" data-tab="login">' + this.t('login') + '</div><div class="auth-tab" data-tab="register">' + this.t('register') + '</div></div>' +
+                    '<div class="auth-form-container">' +
+                    '  <form id="loginForm" class="auth-form">' +
+                    '    <input type="text" id="loginEmail" placeholder="Email или телефон" required>' +
+                    '    <input type="password" id="loginPass" placeholder="' + this.t('password') + '" required>' +
+                    '    <button type="submit" class="auth-btn">' + this.t('loginBtn') + '</button>' +
+                    '  </form>' +
+                    '  <form id="registerForm" class="auth-form" style="display:none">' +
+                    '    <input type="text" id="regName" placeholder="' + this.t('name') + '" required>' +
+                    '    <input type="email" id="regEmail" placeholder="' + this.t('email') + '" required>' +
+                    '    <input type="tel" id="regPhone" placeholder="' + this.t('phone') + '" required>' +
+                    '    <input type="text" id="regKey" placeholder="' + this.t('electronicKey') + '" required>' +
+                    '    <select id="regRole">' +
+                    '      <option value="buyer">' + this.t('buyer') + '</option>' +
+                    '      <option value="seller">' + this.t('seller') + '</option>' +
+                    '      <option value="both">' + this.t('both') + '</option>' +
+                    '    </select>' +
+                    '    <input type="text" id="regAvatar" placeholder="' + this.t('avatar') + '" value="https://randomuser.me/api/portraits/men/100.jpg">' +
+                    '    <div class="text-xs text-gray-500 mb-2">' + this.t('fixedKeyInfo') + '</div>' +
+                    '    <button type="submit" class="auth-btn">' + this.t('registerBtn') + '</button>' +
+                    '  </form>' +
+                    '  <div class="text-center mt-3"><button id="resetBtn" class="text-xs text-red-500 underline">' + this.t('reset') + '</button></div>' +
+                    '</div></div>';
+                document.body.appendChild(modal);
+                modal.querySelector('.close-modal').onclick = function() { modal.style.display = 'none'; };
+                modal.querySelectorAll('.auth-tab').forEach(function(tab) {
+                    tab.onclick = function() {
+                        modal.querySelectorAll('.auth-tab').forEach(function(t) { t.classList.remove('active'); });
+                        tab.classList.add('active');
+                        var isLogin = (tab.dataset.tab === 'login');
+                        document.getElementById('loginForm').style.display = isLogin ? 'block' : 'none';
+                        document.getElementById('registerForm').style.display = isLogin ? 'none' : 'block';
+                    };
+                });
+
+                // Логин
+                document.getElementById('loginForm').onsubmit = function(e) {
+                    e.preventDefault();
+                    var login = document.getElementById('loginEmail').value;
+                    var pass = document.getElementById('loginPass').value;
+                    apiRequest('POST', '/api/auth/login', { login, password: pass }, false)
+                        .then(data => {
+                            if (data.token) {
+                                localStorage.setItem('tm_token', data.token);
+                                localStorage.setItem('tm_user', JSON.stringify(data.user));
+                                ui.renderMain();
+                                modal.style.display = 'none';
+                            } else {
+                                ui.notify('Ошибка', data.message || ui.t('invalidLogin'), 'error');
+                            }
+                        });
+                };
+
+                // Регистрация
+                document.getElementById('registerForm').onsubmit = function(e) {
+                    e.preventDefault();
+                    var name = document.getElementById('regName').value;
+                    var email = document.getElementById('regEmail').value;
+                    var phone = document.getElementById('regPhone').value;
+                    var key = document.getElementById('regKey').value;
+                    var role = document.getElementById('regRole').value;
+                    var avatar = document.getElementById('regAvatar').value;
+                    if (!name || !email || !phone || !key) {
+                        ui.notify('Ошибка', ui.t('fillFields'), 'error');
+                        return;
+                    }
+                    if (key !== FIXED_KEY) {
+                        ui.notify('Ошибка', ui.t('keyMismatch'), 'error');
+                        return;
+                    }
+                    apiRequest('POST', '/api/auth/register', { name, email, phone, electronicKey: key, role, avatar, password: DEF_PASS }, false)
+                        .then(data => {
+                            if (data.token) {
+                                ui.notify('Успех', ui.t('regSuccess'), 'success');
+                                modal.querySelector('.auth-tab[data-tab="login"]').click();
+                            } else {
+                                ui.notify('Ошибка', data.message || 'Ошибка регистрации', 'error');
+                            }
+                        });
+                };
+
+                document.getElementById('resetBtn').onclick = function() {
+                    if (confirm(ui.t('reset') + '?')) {
+                        localStorage.removeItem('tm_token');
+                        localStorage.removeItem('tm_user');
+                        localStorage.removeItem('tm_carousel_slides');
+                        location.reload();
+                    }
+                };
+            }
+            modal.querySelectorAll('.auth-tab')[0].textContent = this.t('login');
+            modal.querySelectorAll('.auth-tab')[1].textContent = this.t('register');
+            document.getElementById('loginForm').querySelector('button').textContent = this.t('loginBtn');
+            document.getElementById('registerForm').querySelector('button').textContent = this.t('registerBtn');
+            document.getElementById('resetBtn').textContent = this.t('reset');
+            modal.style.display = 'flex';
+        },
+
+        // ----- ТОРГОВЛЯ (с API) -----
+        renderTrade: function() {
+            var user = JSON.parse(localStorage.getItem('tm_user') || 'null');
+            if (!user) { this.renderPublic(); return; }
+            var self = this;
+            var cat = 'food';
+            var products = [];
+            var cart = { items: [] };
+            var cartLoaded = false;
+
+            function loadData() {
+                Promise.all([
+                    apiRequest('GET', '/api/products?category=' + cat, null, true),
+                    apiRequest('GET', '/api/cart', null, true)
+                ]).then(([prodData, cartData]) => {
+                    if (prodData) products = prodData;
+                    if (cartData) cart = cartData;
+                    cartLoaded = true;
+                    render();
+                });
+            }
+
+            function render() {
+                var filtered = products.filter(function(p) { return p.category === cat; });
+                var myProds = products.filter(function(p) { return p.sellerId === user._id; });
+                var app = document.getElementById('app');
+                if (!app) return;
+                var html =
+                    '<div class="p-4 max-w-7xl mx-auto">' +
+                    '  <div class="flex flex-wrap justify-between items-center mb-4">' +
+                    '    <h1 class="text-2xl font-bold">' + self.t('trade') + ' <span class="badge-blockchain"><i class="fas fa-link"></i> Блокчейн</span></h1>' +
+                    '    <button onclick="app.navigateTo(\'home\')" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-xl transition">← ' + self.t('mainMenu') + '</button>' +
+                    '  </div>';
+                if (user.role === 'seller' || user.role === 'both') {
+                    html += '<div class="bg-white rounded-2xl p-4 mb-5 shadow-lg border border-white/60">' +
+                        '  <div class="flex justify-between"><h2 class="font-bold">' + self.t('myProducts') + '</h2>' +
+                        '    <button onclick="ui.showAddProduct()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-sm transition"><i class="fas fa-plus"></i> ' + self.t('addProduct') + '</button>' +
+                        '  </div>' +
+                        '  <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">';
+                    if (!myProds.length) html += '<div class="col-span-full text-gray-500">Нет добавленных товаров</div>';
+                    else {
+                        for (var i=0; i<myProds.length; i++) {
+                            var p = myProds[i];
+                            html += '<div class="border rounded-xl p-2 bg-gray-50"><img src="' + p.image + '" class="h-28 w-full object-cover rounded" onerror="this.src=\'https://via.placeholder.com/150\'"><p class="font-bold text-sm">' + p.name + '</p><p class="text-xs">' + p.retailPrice + ' / ' + p.wholesalePrice + ' TMT</p></div>';
+                        }
+                    }
+                    html += '</div></div>';
+                }
+                html += '<div class="flex gap-2 mb-4 flex-wrap">';
+                for (var c=0; c<CATS.length; c++) {
+                    var k = CATS[c];
+                    var lbl = self.t(k);
+                    var cls = (cat === k) ? 'bg-emerald-700 text-white' : 'bg-white shadow';
+                    html += '<button onclick="ui.setCat(\'' + k + '\')" class="px-4 py-2 rounded-full ' + cls + ' transition">' + lbl + '</button>';
+                }
+                html += '</div>';
+                html += '<div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-5">';
+                for (var j=0; j<filtered.length; j++) {
+                    var prod = filtered[j];
+                    html += '<div class="bg-white rounded-2xl p-3 shadow-lg border border-white/60 hover:shadow-xl transition">' +
+                        '<img src="' + prod.image + '" class="h-44 w-full object-cover rounded-xl cursor-pointer" onclick="ui.openFull(0, [{img:\'' + prod.image + '\'}])" onerror="this.src=\'https://via.placeholder.com/200\'">' +
+                        '<h3 class="font-bold mt-2">' + prod.name + '</h3>' +
+                        '<div class="text-sm">' + self.t('retailPrice') + ': ' + prod.retailPrice + ' TMT<br>' + self.t('wholesalePrice') + ': ' + prod.wholesalePrice + ' TMT</div>' +
+                        '<div class="flex gap-1 mt-1"><span class="badge-eds"><i class="fas fa-file-signature"></i> ЭЦП</span><span class="badge-blockchain"><i class="fas fa-link"></i> Блокчейн</span></div>';
+                    if (user.role === 'buyer' || user.role === 'both') {
+                        html += '<div class="mt-2 flex gap-2">' +
+                            '<button onclick="ui.addCart(\'' + prod._id + '\', \'retail\', ' + prod.retailPrice + ')" class="bg-blue-600 hover:bg-blue-700 text-white flex-1 py-2 rounded-xl text-sm transition"><i class="fas fa-shopping-cart"></i> ' + self.t('buyRetail') + '</button>' +
+                            '<button onclick="ui.addCart(\'' + prod._id + '\', \'wholesale\', ' + prod.wholesalePrice + ')" class="bg-emerald-600 hover:bg-emerald-700 text-white flex-1 py-2 rounded-xl text-sm transition"><i class="fas fa-boxes"></i> ' + self.t('buyWholesale') + '</button>' +
+                            '</div>';
+                    }
+                    html += '</div>';
+                }
+                html += '</div>';
+                if (cart.items && cart.items.length) {
+                    html += '<div class="mt-6 bg-white p-4 rounded-2xl shadow-lg border border-white/60"><h2 class="font-bold">' + self.t('cart') + ' (' + cart.items.length + ')</h2>';
+                    for (var k=0; k<cart.items.length; k++) {
+                        var it = cart.items[k];
+                        var typeLabel = it.purchaseType === 'retail' ? self.t('buyRetail') : self.t('buyWholesale');
+                        html += '<div class="flex justify-between border-b py-1"><span>' + it.name + ' — ' + typeLabel + ': ' + it.price + ' TMT × ' + it.quantity + '</span></div>';
+                    }
+                    html += '<div class="mt-3 flex gap-3">' +
+                        '<button onclick="ui.checkout()" class="bg-emerald-700 hover:bg-emerald-800 text-white px-6 py-2 rounded-xl transition"><i class="fas fa-file-signature"></i> ' + self.t('signEDS') + '</button>' +
+                        '<button onclick="ui.clearCart()" class="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded-xl transition">' + self.t('cancel') + '</button>' +
+                        '</div></div>';
+                }
+                html += '</div>';
+                app.innerHTML = html + '<footer class="py-3 text-center text-xs text-gray-600 border-t border-white/30 flex justify-between items-center px-6"><span>© 2026 ' + self.t('appTitle') + ' — ' + self.t('subtitle') + '</span><span id="footerClock" class="footer-clock"></span></footer>';
+                ui.clock();
+                if (window._clockInt) clearInterval(window._clockInt);
+                window._clockInt = setInterval(ui.clock, 1000);
+                var langBtn = document.getElementById('langBtn');
+                if (langBtn) {
+                    langBtn.onclick = function() {
+                        var cur = ui.getLang();
+                        var idx = LANGS.indexOf(cur);
+                        var next = LANGS[(idx + 1) % LANGS.length];
+                        localStorage.setItem('app_lang', next);
+                        ui.renderTrade();
+                    };
+                }
+            }
+
+            window.ui = window.ui || {};
+            ui.setCat = function(c) { cat = c; loadData(); };
+            ui.addCart = function(productId, purchaseType, price) {
+                apiRequest('POST', '/api/cart/add', { productId, purchaseType, quantity: 1 }, true)
+                    .then(data => {
+                        if (data) {
+                            cart = data;
+                            ui.notify('Корзина', 'Товар добавлен', 'success');
+                            render();
+                        }
+                    });
+            };
+            ui.clearCart = function() {
+                apiRequest('DELETE', '/api/cart/clear', null, true)
+                    .then(() => {
+                        cart.items = [];
+                        render();
+                    });
+            };
+            ui.checkout = function() {
+                if (!cart.items || cart.items.length === 0) {
+                    ui.notify('Ошибка', 'Корзина пуста', 'error');
+                    return;
+                }
+                var total = cart.items.reduce(function(sum, it) { return sum + it.price * it.quantity; }, 0);
+                var hash = '0x' + Math.random().toString(16).substring(2,10) + '...' + Math.random().toString(16).substring(2,6);
+                ui.notify('✅ ' + ui.t('signedSuccess'),
+                    '<div class="text-left"><p><strong>Сумма:</strong> ' + total + ' TMT</p><p><strong>Товаров:</strong> ' + cart.items.length + '</p><p><strong>' + ui.t('hash') + ':</strong> <span class="font-mono text-xs break-all">' + hash + '</span></p><p class="mt-2 text-emerald-700"><i class="fas fa-check-circle"></i> Запись добавлена в реестр блокчейна</p></div>', 'success');
+                ui.clearCart();
+            };
+            ui.showAddProduct = function() {
+                var modal = document.getElementById('prodModal');
+                if (!modal) {
+                    modal = document.createElement('div');
+                    modal.id = 'prodModal';
+                    modal.className = 'product-modal';
+                    modal.innerHTML =
+                        '<div class="product-modal-content bg-white p-6 rounded-2xl max-w-md w-full shadow-2xl">' +
+                        '<h3 class="font-bold text-xl mb-3">' + ui.t('addProduct') + '</h3>' +
+                        '<input id="pName" class="w-full border p-2 rounded mb-2" placeholder="' + ui.t('productName') + '">' +
+                        '<input id="pRetail" type="number" class="w-full border p-2 rounded mb-2" placeholder="' + ui.t('retailPrice') + '">' +
+                        '<input id="pWholesale" type="number" class="w-full border p-2 rounded mb-2" placeholder="' + ui.t('wholesalePrice') + '">' +
+                        '<input id="pImage" class="w-full border p-2 rounded mb-2" placeholder="' + ui.t('imageUrl') + '" value="https://picsum.photos/seed/999/200">' +
+                        '<select id="pCat" class="w-full border p-2 rounded mb-3">' +
+                        '  <option value="food">' + ui.t('food') + '</option>' +
+                        '  <option value="light">' + ui.t('light') + '</option>' +
+                        '  <option value="construction">' + ui.t('construction') + '</option>' +
+                        '  <option value="home">' + ui.t('home') + '</option>' +
+                        '</select>' +
+                        '<div class="flex gap-2">' +
+                        '  <button id="submitProd" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded transition">' + ui.t('add') + '</button>' +
+                        '  <button onclick="document.getElementById(\'prodModal\').style.display=\'none\'" class="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded transition">' + ui.t('cancel') + '</button>' +
+                        '</div></div>';
+                    document.body.appendChild(modal);
+                    document.getElementById('submitProd').onclick = function() {
+                        var name = document.getElementById('pName').value;
+                        var retail = parseFloat(document.getElementById('pRetail').value);
+                        var wholesale = parseFloat(document.getElementById('pWholesale').value) || retail * 0.85;
+                        var image = document.getElementById('pImage').value;
+                        var cat = document.getElementById('pCat').value;
+                        if (!name || !retail || !image) {
+                            ui.notify('Ошибка', 'Заполните все поля', 'error');
+                            return;
+                        }
+                        apiRequest('POST', '/api/products', { name, retailPrice: retail, wholesalePrice: wholesale, image, category: cat }, true)
+                            .then(data => {
+                                if (data && data._id) {
+                                    ui.notify('Успех', ui.t('productAdded'), 'success');
+                                    modal.style.display = 'none';
+                                    loadData();
+                                } else {
+                                    ui.notify('Ошибка', 'Не удалось добавить товар', 'error');
+                                }
+                            });
+                    };
+                }
+                modal.style.display = 'flex';
+            };
+            loadData();
+        },
+
+        // ----- ЧАТ (с API) -----
+        renderChat: function() {
+            var user = JSON.parse(localStorage.getItem('tm_user') || 'null');
+            if (!user) { this.renderPublic(); return; }
+            var self = this;
+            var msgs = [];
+
+            function loadMessages() {
+                apiRequest('GET', '/api/chat', null, true)
+                    .then(data => {
+                        if (data) msgs = data;
+                        renderMsgs();
+                    });
+            }
+
+            function renderMsgs() {
+                var cont = document.getElementById('chatMsgs');
+                if (!cont) return;
+                var html = '';
+                for (var i=0; i<msgs.length; i++) {
+                    var m = msgs[i];
+                    var align = (m.senderId && m.senderId._id === user._id) ? 'justify-end' : 'justify-start';
+                    var bg = (m.senderId && m.senderId._id === user._id) ? 'bg-emerald-600 text-white' : 'bg-gray-100';
+                    var senderName = m.senderId ? m.senderId.name : 'unknown';
+                    var time = new Date(m.createdAt).toLocaleTimeString();
+                    html += '<div class="flex ' + align + '"><div class="max-w-[70%] rounded-2xl px-4 py-2 ' + bg + '">' + m.text + '<div class="text-[10px] opacity-70 text-right">' + senderName + ' ' + time + '</div></div></div>';
+                }
+                cont.innerHTML = html;
+                cont.scrollTop = cont.scrollHeight;
+            }
+
+            var app = document.getElementById('app');
+            if (!app) return;
+            app.innerHTML =
+                '<div class="p-4 max-w-4xl mx-auto">' +
+                '  <div class="flex justify-between"><h1 class="text-2xl font-bold">' + self.t('chat') + ' <span class="badge-eds"><i class="fas fa-lock"></i> E2EE</span></h1>' +
+                '    <button onclick="app.navigateTo(\'home\')" class="bg-gray-200 px-4 py-2 rounded-xl">← ' + self.t('mainMenu') + '</button>' +
+                '  </div>' +
+                '  <div class="bg-white rounded-2xl shadow-xl flex flex-col h-[550px] mt-4 border border-white/60">' +
+                '    <div id="chatMsgs" class="flex-1 overflow-auto p-4 space-y-2"></div>' +
+                '    <div class="border-t p-3 flex gap-2">' +
+                '      <input id="chatInput" class="flex-1 border rounded-full px-5 py-2 focus:outline-none focus:border-emerald-600" placeholder="Сообщение...">' +
+                '      <button onclick="ui.sendChat()" class="bg-emerald-600 hover:bg-emerald-700 text-white rounded-full px-6 py-2 transition">' + self.t('loginBtn') + '</button>' +
+                '    </div>' +
+                '  </div>' +
+                '</div>' +
+                '<footer class="py-3 text-center text-xs text-gray-600 border-t border-white/30 flex justify-between items-center px-6"><span>© 2026 ' + self.t('appTitle') + ' — ' + self.t('subtitle') + '</span><span id="footerClock" class="footer-clock"></span></footer>';
+            loadMessages();
+            ui.clock();
+            window.ui.sendChat = function() {
+                var inp = document.getElementById('chatInput');
+                if (!inp || !inp.value.trim()) return;
+                var text = inp.value.trim();
+                // Для демонстрации отправляем админу (id = 1)
+                apiRequest('POST', '/api/chat', { receiverId: '1', text: text }, true)
+                    .then(data => {
+                        if (data) {
+                            msgs.push(data);
+                            renderMsgs();
+                            inp.value = '';
+                        }
+                    });
+            };
+            if (window._clockInt) clearInterval(window._clockInt);
+            window._clockInt = setInterval(ui.clock, 1000);
+        },
+
+        // ----- ПОЧТА (с API) -----
+        renderMail: function() {
+            var user = JSON.parse(localStorage.getItem('tm_user') || 'null');
+            if (!user) { this.renderPublic(); return; }
+            var self = this;
+            var mails = [];
+
+            function loadInbox() {
+                apiRequest('GET', '/api/mail/inbox', null, true)
+                    .then(data => {
+                        if (data) mails = data;
+                        renderList();
+                    });
+            }
+
+            function renderList() {
+                var list = document.getElementById('mailList');
+                if (!list) return;
+                var html = '';
+                for (var i=0; i<mails.length; i++) {
+                    var m = mails[i];
+                    html += '<div onclick="ui.showMail(\'' + m._id + '\')" class="p-2 hover:bg-emerald-50 cursor-pointer border-b"><b>' + m.subject + '</b> <span class="text-xs text-gray-500">от ' + m.from + '</span></div>';
+                }
+                list.innerHTML = html;
+            }
+
+            window.ui.showMail = function(id) {
+                var mail = mails.find(function(m) { return m._id === id; });
+                var body = document.getElementById('mailBody');
+                if (body && mail) {
+                    body.innerHTML = '<h2 class="font-bold">' + mail.subject + '</h2><p class="text-sm">От: ' + mail.from + '</p><div class="mt-2 p-2 bg-gray-50 rounded">' + mail.body + '</div><div class="mt-2"><span class="badge-eds"><i class="fas fa-check"></i> Подписано ЭЦП</span></div>';
+                    apiRequest('PUT', '/api/mail/read/' + id, null, true);
+                }
+            };
+
+            var app = document.getElementById('app');
+            if (!app) return;
+            app.innerHTML =
+                '<div class="p-4 max-w-6xl mx-auto">' +
+                '  <div class="flex justify-between"><h1 class="text-2xl font-bold">' + self.t('mail') + ' <span class="badge-blockchain"><i class="fas fa-shield-alt"></i> Защищено</span></h1>' +
+                '    <button onclick="app.navigateTo(\'home\')" class="bg-gray-200 px-4 py-2 rounded-xl">← ' + self.t('mainMenu') + '</button>' +
+                '  </div>' +
+                '  <div class="bg-white rounded-2xl shadow-xl mt-4 flex h-[500px] border border-white/60">' +
+                '    <div id="mailList" class="w-1/3 border-r p-2 overflow-auto"></div>' +
+                '    <div id="mailBody" class="w-2/3 p-4"></div>' +
+                '  </div>' +
+                '</div>' +
+                '<footer class="py-3 text-center text-xs text-gray-600 border-t border-white/30 flex justify-between items-center px-6"><span>© 2026 ' + self.t('appTitle') + ' — ' + self.t('subtitle') + '</span><span id="footerClock" class="footer-clock"></span></footer>';
+            loadInbox();
+            ui.clock();
+            if (window._clockInt) clearInterval(window._clockInt);
+            window._clockInt = setInterval(ui.clock, 1000);
+        },
+
+        // ----- ПЛАТЕЖИ, КРИПТА, БАНК (заглушки) -----
+        renderPay: function() {
+            var self = this;
+            var app = document.getElementById('app');
+            if (!app) return;
+            app.innerHTML =
+                '<div class="p-5 max-w-2xl mx-auto">' +
+                '  <h1 class="text-2xl font-bold">💳 ' + self.t('pay') + '</h1>' +
+                '  <div class="bg-white p-6 rounded-2xl shadow-lg mt-4 border border-white/60">' +
+                '    <p class="text-lg">' + self.t('balance') + ': <span class="font-bold text-emerald-700">18 750 TMT</span></p>' +
+                '    <p class="text-sm text-gray-500"><i class="fas fa-check-circle text-green-500"></i> Интеграция с НСПП «Мир»</p>' +
+                '    <button class="mt-4 bg-emerald-600 text-white px-6 py-2 rounded-full">Перевод</button>' +
+                '  </div>' +
+                '  <button onclick="app.navigateTo(\'home\')" class="mt-4 bg-gray-200 px-4 py-2 rounded-xl">← ' + self.t('mainMenu') + '</button>' +
+                '</div>' +
+                '<footer class="py-3 text-center text-xs text-gray-600 border-t border-white/30 flex justify-between items-center px-6"><span>© 2026 ' + self.t('appTitle') + ' — ' + self.t('subtitle') + '</span><span id="footerClock" class="footer-clock"></span></footer>';
+            ui.clock();
+            if (window._clockInt) clearInterval(window._clockInt);
+            window._clockInt = setInterval(ui.clock, 1000);
+        },
+
+        renderCoin: function() {
+            var self = this;
+            var app = document.getElementById('app');
+            if (!app) return;
+            app.innerHTML =
+                '<div class="p-5 max-w-2xl mx-auto">' +
+                '  <h1 class="text-2xl font-bold">🪙 ' + self.t('coin') + '</h1>' +
+                '  <div class="bg-white p-6 rounded-2xl shadow-lg mt-4 border border-white/60">' +
+                '    <p class="text-lg">' + self.t('balance') + ': <span class="font-bold text-amber-600">540 TM Coin</span></p>' +
+                '    <p class="text-sm text-gray-500"><i class="fas fa-microchip"></i> Майнинг-пул активен</p>' +
+                '    <button class="mt-4 bg-amber-600 text-white px-6 py-2 rounded-full">Добыча</button>' +
+                '  </div>' +
+                '  <button onclick="app.navigateTo(\'home\')" class="mt-4 bg-gray-200 px-4 py-2 rounded-xl">← ' + self.t('mainMenu') + '</button>' +
+                '</div>' +
+                '<footer class="py-3 text-center text-xs text-gray-600 border-t border-white/30 flex justify-between items-center px-6"><span>© 2026 ' + self.t('appTitle') + ' — ' + self.t('subtitle') + '</span><span id="footerClock" class="footer-clock"></span></footer>';
+            ui.clock();
+            if (window._clockInt) clearInterval(window._clockInt);
+            window._clockInt = setInterval(ui.clock, 1000);
+        },
+
+        renderBank: function() {
+            var self = this;
+            var app = document.getElementById('app');
+            if (!app) return;
+            app.innerHTML =
+                '<div class="p-5 max-w-2xl mx-auto">' +
+                '  <h1 class="text-2xl font-bold">🏦 ' + self.t('bank') + '</h1>' +
+                '  <div class="bg-white p-6 rounded-2xl shadow-lg mt-4 border border-white/60">' +
+                '    <p class="text-lg">' + self.t('credit') + ': <span class="font-bold text-teal-700">120 000 TMT</span></p>' +
+                '    <button onclick="ui.notify(\'Гарантия\', \'Банковская гарантия выдана на сумму 50 000 TMT\', \'success\')" class="mt-2 bg-teal-600 text-white px-6 py-2 rounded-full transition hover:bg-teal-700">' + self.t('guarantee') + '</button>' +
+                '  </div>' +
+                '  <button onclick="app.navigateTo(\'home\')" class="mt-4 bg-gray-200 px-4 py-2 rounded-xl">← ' + self.t('mainMenu') + '</button>' +
+                '</div>' +
+                '<footer class="py-3 text-center text-xs text-gray-600 border-t border-white/30 flex justify-between items-center px-6"><span>© 2026 ' + self.t('appTitle') + ' — ' + self.t('subtitle') + '</span><span id="footerClock" class="footer-clock"></span></footer>';
+            ui.clock();
+            if (window._clockInt) clearInterval(window._clockInt);
+            window._clockInt = setInterval(ui.clock, 1000);
+        },
+
+        // ----- АДМИНКА (с API) -----
+        renderAdmin: function() {
+            var user = JSON.parse(localStorage.getItem('tm_user') || 'null');
+            if (!user || user.role !== 'admin') { app.navigateTo('home'); return; }
+            var self = this;
+            var app = document.getElementById('app');
+            if (!app) return;
+
+            function loadProducts() {
+                apiRequest('GET', '/api/products', null, true)
+                    .then(data => {
+                        if (!data) data = [];
+                        renderTable(data);
+                    });
+            }
+
+            function renderTable(products) {
+                var tableHtml = '<table class="product-table"><thead><tr><th>ID</th><th>Название</th><th>Розница</th><th>Опт</th><th>Категория</th><th>Картинка</th><th>Действие</th></tr></thead><tbody>';
+                for (var i=0; i<products.length; i++) {
+                    var p = products[i];
+                    tableHtml += '<tr>' +
+                        '<td>' + p._id.slice(-6) + '</td>' +
+                        '<td>' + p.name + '</td>' +
+                        '<td>' + p.retailPrice + ' TMT</td>' +
+                        '<td>' + p.wholesalePrice + ' TMT</td>' +
+                        '<td>' + p.category + '</td>' +
+                        '<td><img src="' + p.image + '" style="max-height:40px;max-width:60px;object-fit:cover;" onerror="this.src=\'https://via.placeholder.com/60\'"></td>' +
+                        '<td><i class="fas fa-edit edit-icon" onclick="ui.showEditProduct(\'' + p._id + '\')" title="Редактировать"></i> <i class="fas fa-trash text-red-500 cursor-pointer" onclick="ui.deleteProduct(\'' + p._id + '\')" title="Удалить"></i></td>' +
+                        '</tr>';
+                }
+                tableHtml += '</tbody></table>';
+                document.getElementById('adminTable').innerHTML = tableHtml;
+            }
+
+            app.innerHTML =
+                '<div class="p-5 max-w-6xl mx-auto">' +
+                '  <div class="flex justify-between items-center"><h1 class="text-2xl font-bold">👑 ' + self.t('admin') + ' <span class="badge-eds">ГОСУДАРСТВО</span></h1>' +
+                '    <button onclick="app.navigateTo(\'home\')" class="bg-gray-200 px-4 py-2 rounded">← ' + self.t('mainMenu') + '</button>' +
+                '  </div>' +
+                '  <div class="mt-6">' +
+                '    <h2 class="text-xl font-semibold mb-3">Управление товарами</h2>' +
+                '    <div class="overflow-x-auto" id="adminTable"></div>' +
+                '  </div>' +
+                '  <div class="mt-8 bg-white p-6 rounded-2xl shadow-lg border border-white/60">' +
+                '    <div class="grid md:grid-cols-3 gap-4">' +
+                '      <button onclick="ui.notify(\'' + self.t('taxReport') + '\', \'Выгрузка XML: Налоговая база за июнь 2026. Сделок: 431. Сумма: 12.4 млн TMT. Запись в блокчейн: 0x8f3a...b1d2.\', \'success\')" class="bg-indigo-100 hover:bg-indigo-200 p-4 rounded-2xl shadow text-left transition"><i class="fas fa-file-invoice text-2xl text-indigo-700"></i><h3 class="font-bold">' + self.t('taxReport') + '</h3><p class="text-sm text-gray-500">XML / PDF</p></button>' +
+                '      <button onclick="ui.notify(\'' + self.t('customsReport') + '\', \'Выгрузка: Таможенные декларации. Контрактов: 89. Грузов: 245 тонн. ЭЦП: подтверждена.\', \'success\')" class="bg-blue-100 hover:bg-blue-200 p-4 rounded-2xl shadow text-left transition"><i class="fas fa-ship text-2xl text-blue-700"></i><h3 class="font-bold">' + self.t('customsReport') + '</h3><p class="text-sm text-gray-500">XML / PDF</p></button>' +
+                '      <button onclick="ui.notify(\'' + self.t('presidentReport') + '\', \'📊 Сводный доклад: Рост торговли на 12.3%. Собрано налогов: 2.1 млрд TMT. Активных участников: 3 442.\', \'success\')" class="bg-red-100 hover:bg-red-200 p-4 rounded-2xl shadow text-left transition"><i class="fas fa-landmark text-2xl text-red-700"></i><h3 class="font-bold">' + self.t('presidentReport') + '</h3><p class="text-sm text-gray-500">Аналитика</p></button>' +
+                '    </div>' +
+                '  </div>' +
+                '</div>' +
+                '<footer class="py-3 text-center text-xs text-gray-600 border-t border-white/30 flex justify-between items-center px-6"><span>© 2026 ' + self.t('appTitle') + ' — ' + self.t('subtitle') + '</span><span id="footerClock" class="footer-clock"></span></footer>';
+            loadProducts();
+            ui.clock();
+            if (window._clockInt) clearInterval(window._clockInt);
+            window._clockInt = setInterval(ui.clock, 1000);
+
+            // Редактирование
+            window.ui.showEditProduct = function(productId) {
+                apiRequest('GET', '/api/products', null, true)
+                    .then(products => {
+                        var product = products.find(p => p._id === productId);
+                        if (!product) { ui.notify('Ошибка', 'Товар не найден', 'error'); return; }
+                        var modal = document.getElementById('editModal');
+                        if (!modal) {
+                            modal = document.createElement('div');
+                            modal.id = 'editModal';
+                            modal.className = 'product-modal';
+                            modal.innerHTML =
+                                '<div class="edit-modal-content bg-white p-6 rounded-2xl max-w-md w-full shadow-2xl">' +
+                                '<h3 class="font-bold text-xl mb-3">' + ui.t('editProduct') + '</h3>' +
+                                '<div class="edit-form">' +
+                                '  <input id="editName" class="w-full border p-2 rounded mb-2" placeholder="' + ui.t('productName') + '">' +
+                                '  <input id="editRetail" type="number" class="w-full border p-2 rounded mb-2" placeholder="' + ui.t('retailPrice') + '">' +
+                                '  <input id="editWholesale" type="number" class="w-full border p-2 rounded mb-2" placeholder="' + ui.t('wholesalePrice') + '">' +
+                                '  <input id="editImage" class="w-full border p-2 rounded mb-2" placeholder="' + ui.t('imageUrl') + '">' +
+                                '  <select id="editCategory" class="w-full border p-2 rounded mb-3">' +
+                                '    <option value="food">' + ui.t('food') + '</option>' +
+                                '    <option value="light">' + ui.t('light') + '</option>' +
+                                '    <option value="construction">' + ui.t('construction') + '</option>' +
+                                '    <option value="home">' + ui.t('home') + '</option>' +
+                                '  </select>' +
+                                '  <div class="flex gap-2">' +
+                                '    <button id="saveEditBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded transition">' + ui.t('saveChanges') + '</button>' +
+                                '    <button onclick="document.getElementById(\'editModal\').style.display=\'none\'" class="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded transition">' + ui.t('cancel') + '</button>' +
+                                '  </div>' +
+                                '</div></div>';
+                            document.body.appendChild(modal);
+                            document.getElementById('saveEditBtn').onclick = function() {
+                                var id = modal.dataset.productId;
+                                var name = document.getElementById('editName').value.trim();
+                                var retail = parseFloat(document.getElementById('editRetail').value);
+                                var wholesale = parseFloat(document.getElementById('editWholesale').value);
+                                var image = document.getElementById('editImage').value.trim();
+                                var category = document.getElementById('editCategory').value;
+                                if (!name || !retail || !image) {
+                                    ui.notify('Ошибка', 'Заполните все поля', 'error');
+                                    return;
+                                }
+                                apiRequest('PUT', '/api/products/' + id, { name, retailPrice: retail, wholesalePrice: wholesale || retail * 0.85, image, category }, true)
+                                    .then(data => {
+                                        if (data && data._id) {
+                                            ui.notify('Успех', ui.t('productUpdated'), 'success');
+                                            modal.style.display = 'none';
+                                            ui.renderAdmin();
+                                        } else {
+                                            ui.notify('Ошибка', 'Не удалось обновить товар', 'error');
+                                        }
+                                    });
+                            };
+                        }
+                        document.getElementById('editName').value = product.name;
+                        document.getElementById('editRetail').value = product.retailPrice;
+                        document.getElementById('editWholesale').value = product.wholesalePrice;
+                        document.getElementById('editImage').value = product.image;
+                        document.getElementById('editCategory').value = product.category;
+                        modal.dataset.productId = productId;
+                        modal.style.display = 'flex';
+                    });
+            };
+
+            // Удаление
+            window.ui.deleteProduct = function(productId) {
+                if (!confirm('Удалить товар?')) return;
+                apiRequest('DELETE', '/api/products/' + productId, null, true)
+                    .then(data => {
+                        if (data && data.message) {
+                            ui.notify('Успех', 'Товар удалён', 'success');
+                            ui.renderAdmin();
+                        } else {
+                            ui.notify('Ошибка', 'Не удалось удалить товар', 'error');
+                        }
+                    });
+            };
+        }
+    };
+
+    // ---------- ГЛАВНЫЙ МОДУЛЬ ----------
+    var app = {
+        init: function() {
+            console.log('Зайди удивишься v5.0 загружен (интеграция с бэкендом)');
+            var user = JSON.parse(localStorage.getItem('tm_user') || 'null');
+            if (user) {
+                apiRequest('GET', '/api/auth/me', null, true)
+                    .then(data => {
+                        if (data && data._id) {
+                            ui.renderMain();
+                        } else {
+                            localStorage.removeItem('tm_token');
+                            localStorage.removeItem('tm_user');
+                            ui.renderPublic();
+                        }
+                    });
+            } else {
+                ui.renderPublic();
+            }
+        },
+        navigateTo: function(view) {
+            window._currentView = view;
+            switch (view) {
+                case 'trade': ui.renderTrade(); break;
+                case 'chat': ui.renderChat(); break;
+                case 'mail': ui.renderMail(); break;
+                case 'pay': ui.renderPay(); break;
+                case 'coin': ui.renderCoin(); break;
+                case 'bank': ui.renderBank(); break;
+                case 'admin': ui.renderAdmin(); break;
+                default: ui.renderMain();
+            }
+        },
+        logout: function() {
+            localStorage.removeItem('tm_token');
+            localStorage.removeItem('tm_user');
+            ui.renderPublic();
+        }
+    };
+
+    window.app = app;
+    window.ui = ui;
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() { app.init(); });
+    } else {
+        app.init();
+    }
+
+})();
+</script>
+</body>
+</html>
